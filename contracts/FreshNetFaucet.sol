@@ -14,6 +14,8 @@ contract FreshNetFaucet {
 
     mapping (address => uint256) nextWithdrawalTime;
 
+    event FaucetFunded(address account, uint256 amount);
+
     constructor(address tokenAddress) payable {
         owner = payable(msg.sender);
         token = IERC20(tokenAddress);
@@ -26,5 +28,26 @@ contract FreshNetFaucet {
 
         nextWithdrawalTime[msg.sender] = block.timestamp + lockTime;
         token.transfert(address(msg.sender), withdrawalAmount);
+    }
+
+    function fund() public payable {
+        emit FaucetFunded(msg.sender, msg.value);
+    }
+
+    function getBalance() public view return (uint256) {
+        return token.balanceOf(address(this));
+    }
+
+    function setWithdrawalAmount(uint256 amount) public onlyOwner {
+        withdrawalAmount = amount * timeDecimals;
+    }
+
+    function setLockTime(uint256 time) public onlyOwner {
+        lockTime = time * 1 minutes;
+    }
+
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only owner can do this action.");
+        _;
     }
 }
